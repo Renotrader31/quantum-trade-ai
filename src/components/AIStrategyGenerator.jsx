@@ -5,7 +5,6 @@ const AIStrategyGenerator = ({ apiKeys }) => {
     const [mlSystem] = useState(new EnhancedMLSystem());
     const [strategies, setStrategies] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [selectedStrategy, setSelectedStrategy] = useState(null);
 
     useEffect(() => {
         generateStrategies();
@@ -88,6 +87,14 @@ const AIStrategyGenerator = ({ apiKeys }) => {
                                     <span className="text-gray-400">Confidence:</span>
                                     <span>{strategy.confidence.toFixed(0)}%</span>
                                 </div>
+                                <div className="flex justify-between">
+                                    <span className="text-gray-400">Risk:</span>
+                                    <span className={
+                                        strategy.risk === 'LOW' ? 'text-green-400' :
+                                        strategy.risk === 'MEDIUM' ? 'text-yellow-400' :
+                                        'text-red-400'
+                                    }>{strategy.risk}</span>
+                                </div>
                             </div>
                             
                             <div className="mt-3 p-2 bg-gray-900 rounded text-xs text-gray-300">
@@ -99,6 +106,11 @@ const AIStrategyGenerator = ({ apiKeys }) => {
                             </button>
                         </div>
                     ))}
+                    {strategies.length === 0 && (
+                        <div className="col-span-3 text-center text-gray-400 py-8">
+                            No strategies generated yet. Click "Generate New Strategies" to start!
+                        </div>
+                    )}
                 </div>
             )}
         </div>
