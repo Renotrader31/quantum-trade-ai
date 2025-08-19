@@ -189,14 +189,16 @@ function App() {
                 </p>
               </div>
             </div>
-           <button 
-  className="text-white px-6 py-2 rounded-lg text-sm font-semibold transition-colors"
-  style={{
-    background: 'linear-gradient(135deg, #0066ff 0%, #8b5cf6 100%)',
-    minWidth: '140px'
-  }}
+          <button
+    className="px-6 py-2 rounded-lg text-sm font-semibold transition-colors"
+    style={{
+        background: 'linear-gradient(135deg, #0066ff 0%, #8b5cf6 100%)',
+        color: 'white',
+        minWidth: '140px',
+        border: 'none'
+    }}
 >
-  View Analysis
+    View Analysis
 </button>
           </div>
         </div>
