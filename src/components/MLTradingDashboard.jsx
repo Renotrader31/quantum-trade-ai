@@ -31,9 +31,9 @@ useEffect(() => {
             setMlSystem(system);
             
             // Generate initial recommendations with real data
-const newMarketData = await getMockMarketData();
-setMarketData(newMarketData); // Add this line
-const recs = system.generateRecommendations(newMarketData);
+const data = await getMockMarketData();
+setMarketData(data); // Add this line
+const recs = system.generateRecommendations(data);
             
             // Get performance metrics
             const perf = system.getPerformanceMetrics();
@@ -43,8 +43,8 @@ const recs = system.generateRecommendations(newMarketData);
             
             // Set up auto-refresh with real data
             const interval = setInterval(async () => {
-                const newMarketData = await getMockMarketData(); // Now async!
-                const newRecs = system.generateRecommendations(newMarketData);
+               const refreshedData = await getMockMarketData();
+               const newRecs = system.generateRecommendations(refreshedData);
                 setRecommendations(newRecs);
                 setPerformance(system.getPerformanceMetrics());
             }, 30000); // Update every 30 seconds
