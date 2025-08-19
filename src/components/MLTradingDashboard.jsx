@@ -6,6 +6,7 @@ import {
     RefreshCw, Award, Flame, LineChart, Clock,
     TrendingDown, Calendar, PieChart, BarChart2
 } from 'lucide-react';
+import { fetchRealMarketData, fetchOptionsFlow } from '../services/DataService';
 
 const MLTradingDashboard = () => {
     const [mlSystem, setMlSystem] = useState(null);
