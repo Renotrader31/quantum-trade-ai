@@ -17,7 +17,7 @@ app.get('/api/test', (req, res) => {
   });
 });
 
-// Polygon API proxy - using a simpler endpoint that works with free tier
+// Polygon API proxy - using simpler endpoint for free tier
 app.get('/api/polygon/:symbol', async (req, res) => {
   try {
     const { symbol } = req.params;
@@ -25,16 +25,16 @@ app.get('/api/polygon/:symbol', async (req, res) => {
     
     console.log(`Fetching ${symbol} from Polygon...`);
     
-    // Use the previous day's data endpoint (works with free tier)
-    const url = `https://api.polygon.io/v2/aggs/ticker/${symbol}/prev?adjusted=true&apikey=${apiKey}`;
+    // Use the simplest endpoint that works with free tier
+    const url = `https://api.polygon.io/v1/last/stocks/${symbol}?apikey=${apiKey}`;
     
     const response = await fetch(url);
     const data = await response.json();
     
     console.log('Polygon response:', data);
     
-    if (data.status === 'ERROR') {
-      throw new Error(data.error || 'Polygon API error');
+    if (data.status === 'ERROR' || data.status === 'NOT_AUTHORIZED') {
+      throw new Error(data.error || 'Polygon API access denied');
     }
     
     res.json(data);
