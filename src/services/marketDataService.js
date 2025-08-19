@@ -37,14 +37,20 @@ async function fetchWithCache(url, cacheKey) {
 
 // Get real-time stock quote - tries multiple sources
 export async function getStockQuote(symbol) {
+    console.log(`Fetching quote for ${symbol}...`);
+    
     // Try Twelve Data first (usually fastest and most reliable)
     if (TWELVE_DATA_KEY) {
         try {
+            console.log(`Trying Twelve Data for ${symbol}...`);
             const url = `https://api.twelvedata.com/quote?symbol=${symbol}&apikey=${TWELVE_DATA_KEY}`;
             const response = await fetch(url);
             const data = await response.json();
             
+            console.log(`Twelve Data response for ${symbol}:`, data);
+            
             if (data && data.price) {
+                console.log(`✅ Got ${symbol} from Twelve Data: ${data.price}`);
                 return {
                     symbol: symbol,
                     price: parseFloat(data.close || data.price || 0),
@@ -56,22 +62,27 @@ export async function getStockQuote(symbol) {
                 };
             }
         } catch (error) {
-            console.log(`Twelve Data error for ${symbol}, trying Alpha Vantage...`);
+            console.log(`Twelve Data error for ${symbol}:`, error.message);
         }
     }
     
     // Try Alpha Vantage as backup
     if (ALPHA_VANTAGE_KEY) {
         try {
+            console.log(`Trying Alpha Vantage for ${symbol}...`);
             const url = `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${symbol}&apikey=${ALPHA_VANTAGE_KEY}`;
             const response = await fetch(url);
             const data = await response.json();
             
+            console.log(`Alpha Vantage response for ${symbol}:`, data);
+            
             if (data['Global Quote']) {
                 const quote = data['Global Quote'];
+                const price = parseFloat(quote['05. price'] || quote['08. previous close'] || 0);
+                console.log(`✅ Got ${symbol} from Alpha Vantage: ${price}`);
                 return {
                     symbol: symbol,
-                    price: parseFloat(quote['05. price'] || quote['08. previous close'] || 0),
+                    price: price,
                     change: parseFloat(quote['10. change percent']?.replace('%', '') || 0),
                     volume: parseInt(quote['06. volume'] || 0),
                     high: parseFloat(quote['03. high'] || 0),
@@ -80,38 +91,12 @@ export async function getStockQuote(symbol) {
                 };
             }
         } catch (error) {
-            console.log(`Alpha Vantage error for ${symbol}, trying Polygon...`);
+            console.log(`Alpha Vantage error for ${symbol}:`, error.message);
         }
     }
     
-    // Try Polygon as last resort (in case the key starts working)
-    if (POLYGON_KEY && POLYGON_KEY !== 'undefined') {
-        try {
-            const url = `https://api.polygon.io/v2/aggs/ticker/${symbol}/prev?adjusted=true&apiKey=${POLYGON_KEY}`;
-            const response = await fetch(url);
-            
-            if (response.ok) {
-                const data = await response.json();
-                if (data && data.results && data.results[0]) {
-                    const result = data.results[0];
-                    return {
-                        symbol: symbol,
-                        price: result.c,
-                        change: ((result.c - result.o) / result.o) * 100,
-                        volume: result.v,
-                        high: result.h,
-                        low: result.l,
-                        open: result.o
-                    };
-                }
-            }
-        } catch (error) {
-            console.log(`Polygon still not working for ${symbol}`);
-        }
-    }
-    
-    // Final fallback to mock data
-    console.log(`Using mock data for ${symbol}`);
+    // Skip Polygon since it's not working
+    console.log(`❌ Using mock data for ${symbol} - APIs failed`);
     return getMockQuote(symbol);
 }
 
