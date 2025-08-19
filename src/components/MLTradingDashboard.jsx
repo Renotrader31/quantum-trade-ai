@@ -63,7 +63,7 @@ const getMockMarketData = async () => {
     try {
         console.log('Fetching real market data...');
         // Try to fetch real data first
-        const realData = await fetchRealMarketData(['SPY', 'QQQ', 'AAPL', 'NVDA', 'TSLA']);
+        const realData = await getRealMarketData(['SPY', 'QQQ', 'AAPL', 'NVDA', 'TSLA']);
         console.log('Real data received:', realData);
         
         // ... rest of the function
