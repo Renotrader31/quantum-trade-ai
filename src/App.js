@@ -7,6 +7,7 @@ import BacktestingEngine from './components/BacktestingEngine';
 import PortfolioManager from './components/PortfolioManager';
 import MarketAnalytics from './components/MarketAnalytics';
 import Settings from './components/Settings';
+import AIStrategyGenerator from './components/AIStrategyGenerator';
 
 // Icons - using emoji for simplicity, can replace with lucide-react
 const Navigation = ({ activeView, setActiveView }) => {
