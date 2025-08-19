@@ -6,7 +6,7 @@ import {
     RefreshCw, Award, Flame, LineChart, Clock,
     TrendingDown, Calendar, PieChart, BarChart2
 } from 'lucide-react';
-import { fetchRealMarketData, fetchOptionsFlow } from '../services/DataService';
+import { getRealMarketData } from '../services/marketDataService';
 
 const MLTradingDashboard = () => {
     const [mlSystem, setMlSystem] = useState(null);
@@ -31,7 +31,7 @@ useEffect(() => {
             setMlSystem(system);
             
             // Generate initial recommendations with real data
-const data = await getMockMarketData();
+const data = await getRealMarketData(); // Changed from getMockMarketData
 setMarketData(data); // Add this line
 const recs = system.generateRecommendations(data);
             
@@ -43,7 +43,7 @@ const recs = system.generateRecommendations(data);
             
             // Set up auto-refresh with real data
             const interval = setInterval(async () => {
-               const refreshedData = await getMockMarketData();
+               const refreshedData = await getRealMarketData(); // Changed from getMockMarketData
                const newRecs = system.generateRecommendations(refreshedData);
                 setRecommendations(newRecs);
                 setPerformance(system.getPerformanceMetrics());
