@@ -85,26 +85,69 @@ export async function getOptionsFlow() {
     }
 
     try {
-        const url = `https://api.unusualwhales.com/api/option_flows?api_key=${UW_KEY}&limit=10`;
-        const response = await fetch(url);
+        // Using the options flow endpoint
+        const url = `https://api.unusualwhales.com/api/stock/options/flow?ticker=SPY&limit=20`;
+        const headers = {
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${UW_KEY}`
+        };
+        
+        const response = await fetch(url, { headers });
         const data = await response.json();
         
         if (data && data.data) {
-            return data.data.map(flow => ({
-                symbol: flow.symbol,
-                type: flow.order_type,
-                strike: flow.strike,
-                expiry: flow.expiry,
-                premium: flow.premium,
-                volume: flow.volume,
-                sentiment: flow.sentiment
+            return data.data.slice(0, 10).map(flow => ({
+                symbol: flow.underlying_symbol || flow.ticker || 'SPY',
+                type: flow.option_type ? flow.option_type.toUpperCase() : 'CALL',
+                strike: flow.strike || 0,
+                expiry: flow.expiry || flow.expires_at || '2025-01-17',
+                premium: flow.premium || flow.total_premium || 0,
+                volume: flow.volume || flow.size || 0,
+                sentiment: flow.tags && flow.tags.includes('bullish') ? 'BULLISH' : 
+                          flow.tags && flow.tags.includes('bearish') ? 'BEARISH' : 'NEUTRAL',
+                price: flow.price || 0,
+                underlying: flow.underlying_price || 0
             }));
         }
     } catch (error) {
-        console.error('Error fetching options flow:', error);
+        console.error('Error fetching UW options flow:', error);
     }
     
     return getMockOptionsFlow();
+}
+
+// Get unusual activity/alerts
+export async function getUnusualActivity() {
+    if (!UW_KEY) {
+        return [];
+    }
+
+    try {
+        const url = `https://api.unusualwhales.com/api/stock/options/volume_alerts`;
+        const headers = {
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${UW_KEY}`
+        };
+        
+        const response = await fetch(url, { headers });
+        const data = await response.json();
+        
+        if (data && data.data) {
+            return data.data.slice(0, 5).map(alert => ({
+                ticker: alert.ticker,
+                alertType: alert.alert_rule,
+                strike: alert.strike,
+                expiry: alert.expiry,
+                premium: alert.total_premium,
+                volumeOIRatio: alert.volume_oi_ratio,
+                type: alert.type
+            }));
+        }
+    } catch (error) {
+        console.error('Error fetching unusual activity:', error);
+    }
+    
+    return [];
 }
 
 // Mock data fallbacks
@@ -140,6 +183,7 @@ export async function getRealMarketData() {
     try {
         const marketOverview = await getMarketOverview();
         const optionsFlow = await getOptionsFlow();
+        const unusualActivity = await getUnusualActivity();
         
         // Ensure we have valid data for each stock
         const formattedData = {};
@@ -166,6 +210,7 @@ export async function getRealMarketData() {
         });
         
         formattedData.optionsFlow = optionsFlow;
+        formattedData.unusualActivity = unusualActivity;
         formattedData.marketSentiment = marketOverview.sentiment;
         formattedData.timestamp = marketOverview.timestamp;
         
@@ -176,7 +221,9 @@ export async function getRealMarketData() {
         return {
             SPY: { currentPrice: 0, change: 0, volume: 0, prices: [], highs: [], lows: [] },
             QQQ: { currentPrice: 0, change: 0, volume: 0, prices: [], highs: [], lows: [] },
-            AAPL: { currentPrice: 0, change: 0, volume: 0, prices: [], highs: [], lows: [] }
+            AAPL: { currentPrice: 0, change: 0, volume: 0, prices: [], highs: [], lows: [] },
+            optionsFlow: [],
+            unusualActivity: []
         };
     }
 }
