@@ -277,6 +277,35 @@ const getMockMarketData = async () => {
                         </div>
                     </div>
                 )}
+                
+                {/* Real-Time Market Data */}
+<div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+    {['SPY', 'QQQ', 'AAPL', 'NVDA', 'TSLA'].map(symbol => {
+        const data = recommendations.find(r => r.symbol === symbol);
+        const price = data?.currentPrice || 0;
+        const change = data?.change || 0;
+        const isPositive = change > 0;
+        
+        return (
+            <div key={symbol} className="bg-gray-800 p-4 rounded-lg">
+                <div className="flex justify-between items-start mb-2">
+                    <span className="text-lg font-bold">{symbol}</span>
+                    <span className={`text-xs px-2 py-1 rounded ${
+                        isPositive ? 'bg-green-900 text-green-400' : 'bg-red-900 text-red-400'
+                    }`}>
+                        {isPositive ? '↑' : '↓'} {Math.abs(change).toFixed(2)}%
+                    </span>
+                </div>
+                <div className="text-2xl font-bold">
+                    ${price.toFixed(2)}
+                </div>
+                <div className="text-xs text-gray-400 mt-1">
+                    Vol: {(data?.volume / 1000000).toFixed(1)}M
+                </div>
+            </div>
+        );
+    })}
+</div>
 
                 {/* Main Content */}
                 {activeView === 'dashboard' && (
