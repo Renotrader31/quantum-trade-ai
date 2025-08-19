@@ -15,14 +15,14 @@ const MLTradingDashboard = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [activeView, setActiveView] = useState('dashboard');
     const [selectedSymbol, setSelectedSymbol] = useState('SPY');
-    const [tradeForm, setTradeForm] = useState({
-    const [marketData, setMarketData] = useState({});
-        symbol: '',
-        action: 'buy',
-        price: '',
-        quantity: '',
-        strategy: ''
-    });
+    const [tradeForm, setTradeForm] = useState({    // Line 18
+    symbol: '',                                    // Line 19
+    action: 'buy',                                // Line 20
+    price: '',                                     // Line 21
+    quantity: '',                                  // Line 22
+    strategy: ''                                   // Line 23
+});                                                // Line 24
+const [marketData, setMarketData] = useState({}); // Line 25
 useEffect(() => {
     const initializeML = async () => {
         try {
