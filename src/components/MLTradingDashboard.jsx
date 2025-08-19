@@ -31,7 +31,7 @@ useEffect(() => {
             setMlSystem(system);
             
             // Generate initial recommendations with real data
-const marketData = await getMockMarketData();
+const newMarketData = await getMockMarketData();
 setMarketData(newMarketData); // Add this line
 const recs = system.generateRecommendations(newMarketData);
             
