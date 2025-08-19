@@ -3,6 +3,16 @@ const cors = require('cors');
 const path = require('path');
 require('dotenv').config();
 
+// Debug: Check if environment variables are loaded
+console.log('Environment Variables Check:');
+console.log('POLYGON_KEY:', process.env.REACT_APP_POLYGON_API_KEY ? 'Loaded ✅' : 'Missing ❌');
+console.log('TWELVE_DATA_KEY:', process.env.REACT_APP_TWELVE_DATA_KEY ? 'Loaded ✅' : 'Missing ❌');
+console.log('ALPHA_VANTAGE_KEY:', process.env.REACT_APP_ALPHA_VANTAGE_KEY ? 'Loaded ✅' : 'Missing ❌');
+console.log('---');
+
+const app = express();
+// ... rest of your code
+
 const app = express();
 const PORT = process.env.PORT || 3001;
 
