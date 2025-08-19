@@ -513,6 +513,7 @@ nav button {
     display: none;
   }
 }
+
 /* Fix for specific button sizing */
 nav button {
   min-width: 120px;
