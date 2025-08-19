@@ -16,6 +16,7 @@ const MLTradingDashboard = () => {
     const [activeView, setActiveView] = useState('dashboard');
     const [selectedSymbol, setSelectedSymbol] = useState('SPY');
     const [tradeForm, setTradeForm] = useState({
+    const [marketData, setMarketData] = useState({});
         symbol: '',
         action: 'buy',
         price: '',
@@ -30,9 +31,9 @@ useEffect(() => {
             setMlSystem(system);
             
             // Generate initial recommendations with real data
-            const marketData = await getMockMarketData(); // Now async!
-            const recs = system.generateRecommendations(marketData);
-            setRecommendations(recs);
+const marketData = await getMockMarketData();
+setMarketData(marketData); // Add this line
+const recs = system.generateRecommendations(marketData);
             
             // Get performance metrics
             const perf = system.getPerformanceMetrics();
