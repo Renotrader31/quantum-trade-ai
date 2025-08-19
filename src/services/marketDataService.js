@@ -3,6 +3,13 @@ const POLYGON_KEY = process.env.REACT_APP_POLYGON_API_KEY;
 const FMP_KEY = process.env.REACT_APP_FMP_API_KEY;
 const UW_KEY = process.env.REACT_APP_UNUSUAL_WHALES_KEY;
 
+// Debug: Check if API keys are loaded (only first few chars for security)
+console.log('API Keys loaded:', {
+    polygon: POLYGON_KEY ? `Yes (${POLYGON_KEY.substring(0, 4)}...)` : 'No',
+    fmp: FMP_KEY ? `Yes (${FMP_KEY.substring(0, 4)}...)` : 'No',
+    uw: UW_KEY ? `Yes (${UW_KEY.substring(0, 4)}...)` : 'No'
+});
+
 // Cache for API responses
 const cache = new Map();
 const CACHE_DURATION = 30000; // 30 seconds
@@ -31,20 +38,33 @@ export async function getStockQuote(symbol) {
         return getMockQuote(symbol);
     }
 
+    // Polygon requires the API key as a query parameter
     const url = `https://api.polygon.io/v2/aggs/ticker/${symbol}/prev?adjusted=true&apiKey=${POLYGON_KEY}`;
-    const data = await fetchWithCache(url, `quote_${symbol}`);
     
-    if (data && data.results && data.results[0]) {
-        const result = data.results[0];
-        return {
-            symbol: symbol,
-            price: result.c, // close price
-            change: ((result.c - result.o) / result.o) * 100, // percentage change
-            volume: result.v,
-            high: result.h,
-            low: result.l,
-            open: result.o
-        };
+    try {
+        const response = await fetch(url);
+        
+        if (!response.ok) {
+            console.error(`Polygon API error for ${symbol}: ${response.status}`);
+            return getMockQuote(symbol);
+        }
+        
+        const data = await response.json();
+        
+        if (data && data.results && data.results[0]) {
+            const result = data.results[0];
+            return {
+                symbol: symbol,
+                price: result.c, // close price
+                change: ((result.c - result.o) / result.o) * 100, // percentage change
+                volume: result.v,
+                high: result.h,
+                low: result.l,
+                open: result.o
+            };
+        }
+    } catch (error) {
+        console.error(`Error fetching quote for ${symbol}:`, error);
     }
     
     return getMockQuote(symbol);
