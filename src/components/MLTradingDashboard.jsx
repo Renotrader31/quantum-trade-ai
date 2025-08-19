@@ -57,11 +57,15 @@ useEffect(() => {
     
     initializeML();
 }, []);
-  const getMockMarketData = async () => {
+    
+const getMockMarketData = async () => {
     try {
+        console.log('Fetching real market data...');
         // Try to fetch real data first
         const realData = await fetchRealMarketData(['SPY', 'QQQ', 'AAPL', 'NVDA', 'TSLA']);
+        console.log('Real data received:', realData);
         
+        // ... rest of the function
         // Format for ML system
         const formattedData = {};
         Object.keys(realData).forEach(symbol => {
