@@ -11,9 +11,6 @@ console.log('ALPHA_VANTAGE_KEY:', process.env.REACT_APP_ALPHA_VANTAGE_KEY ? 'Loa
 console.log('---');
 
 const app = express();
-// ... rest of your code
-
-const app = express();
 const PORT = process.env.PORT || 3001;
 
 app.use(cors());
