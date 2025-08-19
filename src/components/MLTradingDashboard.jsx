@@ -32,8 +32,8 @@ useEffect(() => {
             
             // Generate initial recommendations with real data
 const marketData = await getMockMarketData();
-setMarketData(marketData); // Add this line
-const recs = system.generateRecommendations(marketData);
+setMarketData(newmarketData); // Add this line
+const recs = system.generateRecommendations(newmarketData);
             
             // Get performance metrics
             const perf = system.getPerformanceMetrics();
