@@ -4,11 +4,6 @@ const FMP_KEY = process.env.REACT_APP_FMP_API_KEY;
 const UW_KEY = process.env.REACT_APP_UNUSUAL_WHALES_KEY;
 const ALPHA_VANTAGE_KEY = process.env.REACT_APP_ALPHA_VANTAGE_KEY || 'demo';
 const TWELVE_DATA_KEY = process.env.REACT_APP_TWELVE_DATA_KEY;
-console.log('Keys check:', { 
-    twelve: TWELVE_DATA_KEY ? 'loaded' : 'missing',
-    alpha: ALPHA_VANTAGE_KEY ? 'loaded' : 'missing',
-    polygon: POLYGON_KEY ? 'loaded' : 'missing'
-});
 
 // Debug: Check if API keys are loaded (only first few chars for security)
 console.log('API Keys loaded:', {
@@ -155,49 +150,51 @@ export async function getOptionsFlow() {
     }
 
     try {
-        // Try the correct endpoint format
-        const url = `https://api.unusualwhales.com/api/stock/SPY/options-flow`;
+        // Using the correct options volume endpoint from the docs
+        const url = `https://api.unusualwhales.com/api/options/volume/alerts`;
         const headers = {
             'Accept': 'application/json',
-            'x-api-key': UW_KEY  // Try x-api-key header format
+            'Authorization': `Bearer ${UW_KEY}`
         };
         
         const response = await fetch(url, { headers });
         
-        if (!response.ok) {
-            console.log('UW API response not OK, trying alternative format...');
-            // Try alternative endpoint
-            const altUrl = `https://api.unusualwhales.com/v1/market/options/flow?limit=10`;
-            const altResponse = await fetch(altUrl, { 
-                headers: { 'Authorization': `Bearer ${UW_KEY}` }
-            });
+        if (response.ok) {
+            const data = await response.json();
+            console.log('UW API response received:', data);
+            
+            if (data && data.data) {
+                return data.data.slice(0, 10).map(alert => ({
+                    symbol: alert.ticker || 'SPY',
+                    type: alert.type ? alert.type.toUpperCase() : 'CALL',
+                    strike: parseFloat(alert.strike) || 0,
+                    expiry: alert.expiry || '2025-01-17',
+                    premium: parseFloat(alert.total_premium) || 0,
+                    volume: parseInt(alert.volume) || 0,
+                    sentiment: parseFloat(alert.volume_oi_ratio) > 2 ? 'BULLISH' : 'NEUTRAL',
+                    alertType: alert.alert_rule || 'Volume Alert'
+                }));
+            }
+        } else {
+            console.log(`UW API error: ${response.status} - ${response.statusText}`);
+            
+            // Try alternative endpoint - regular options flow
+            const altUrl = `https://api.unusualwhales.com/api/options/flow`;
+            const altResponse = await fetch(altUrl, { headers });
             
             if (altResponse.ok) {
-                const data = await altResponse.json();
-                if (data && data.data) {
-                    return data.data.slice(0, 10).map(flow => ({
+                const altData = await altResponse.json();
+                if (altData && altData.data) {
+                    return altData.data.slice(0, 10).map(flow => ({
                         symbol: flow.underlying_symbol || flow.ticker || 'SPY',
                         type: flow.option_type ? flow.option_type.toUpperCase() : 'CALL',
                         strike: flow.strike || 0,
                         expiry: flow.expiry || '2025-01-17',
                         premium: flow.premium || 0,
-                        volume: flow.volume || 0,
+                        volume: flow.size || flow.volume || 0,
                         sentiment: 'NEUTRAL'
                     }));
                 }
-            }
-        } else {
-            const data = await response.json();
-            if (data && data.data) {
-                return data.data.slice(0, 10).map(flow => ({
-                    symbol: flow.underlying_symbol || flow.ticker || 'SPY',
-                    type: flow.option_type ? flow.option_type.toUpperCase() : 'CALL',
-                    strike: flow.strike || 0,
-                    expiry: flow.expiry || '2025-01-17',
-                    premium: flow.premium || 0,
-                    volume: flow.volume || 0,
-                    sentiment: 'NEUTRAL'
-                }));
             }
         }
     } catch (error) {
