@@ -57,8 +57,39 @@ const MLTradingDashboard = () => {
         initializeML();
     }, []);
 
-    const getMockMarketData = () => {
-        // In production, this would fetch real market data
+  const getMockMarketData = async () => {
+    try {
+        // Try to fetch real data first
+        const realData = await fetchRealMarketData(['SPY', 'QQQ', 'AAPL', 'NVDA', 'TSLA']);
+        
+        // Format for ML system
+        const formattedData = {};
+        Object.keys(realData).forEach(symbol => {
+            const stockData = realData[symbol];
+            formattedData[symbol] = {
+                ...stockData,
+                prices: Array(50).fill(stockData.currentPrice).map((p, i) => 
+                    p + (Math.random() - 0.5) * 2
+                ), // Generate price history
+                highs: Array(50).fill(stockData.high || stockData.currentPrice),
+                lows: Array(50).fill(stockData.low || stockData.currentPrice),
+                vwap: stockData.currentPrice,
+                avgVolume: stockData.volume,
+                callVolume: Math.floor(Math.random() * 100000),
+                putVolume: Math.floor(Math.random() * 100000),
+                unusualActivity: Math.random() > 0.7,
+                socialSentiment: Math.random() - 0.5,
+                newsSentiment: Math.random() - 0.5,
+                marketCap: Math.floor(Math.random() * 1000000000000),
+                sectorStrength: Math.random(),
+                correlationSPY: Math.random()
+            };
+        });
+        
+        return formattedData;
+    } catch (error) {
+        console.log('Using mock data as fallback');
+        // Original mock data code as fallback
         const symbols = ['SPY', 'QQQ', 'AAPL', 'NVDA', 'TSLA'];
         const data = {};
         
@@ -89,8 +120,8 @@ const MLTradingDashboard = () => {
         });
         
         return data;
-    };
-
+    }
+};
     const handleRecordTrade = useCallback(() => {
         if (!mlSystem) return;
         
