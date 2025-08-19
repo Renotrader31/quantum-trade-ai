@@ -108,7 +108,7 @@ const AccountInfo = () => {
         <div className="text-sm font-bold text-white">$125,430.52</div>
       </div>
       <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">
-        JD
+        GL
       </div>
     </div>
   );
