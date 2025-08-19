@@ -22,41 +22,41 @@ const MLTradingDashboard = () => {
         quantity: '',
         strategy: ''
     });
-
-    useEffect(() => {
-        const initializeML = async () => {
-            try {
-                const { default: MLTradingSystem } = await import('../services/MLTradingSystem');
-                const system = new MLTradingSystem();
-                setMlSystem(system);
-                
-                // Generate initial recommendations
-                const recs = system.generateRecommendations(getMockMarketData());
-                setRecommendations(recs);
-                
-                // Get performance metrics
-                const perf = system.getPerformanceMetrics();
-                setPerformance(perf);
-                
-                setIsLoading(false);
-                
-                // Set up auto-refresh
-                const interval = setInterval(() => {
-                    const newRecs = system.generateRecommendations(getMockMarketData());
-                    setRecommendations(newRecs);
-                    setPerformance(system.getPerformanceMetrics());
-                }, 30000); // Update every 30 seconds
-                
-                return () => clearInterval(interval);
-            } catch (error) {
-                console.error('Failed to initialize ML system:', error);
-                setIsLoading(false);
-            }
-        };
-        
-        initializeML();
-    }, []);
-
+useEffect(() => {
+    const initializeML = async () => {
+        try {
+            const { default: MLTradingSystem } = await import('../services/MLTradingSystem');
+            const system = new MLTradingSystem();
+            setMlSystem(system);
+            
+            // Generate initial recommendations with real data
+            const marketData = await getMockMarketData(); // Now async!
+            const recs = system.generateRecommendations(marketData);
+            setRecommendations(recs);
+            
+            // Get performance metrics
+            const perf = system.getPerformanceMetrics();
+            setPerformance(perf);
+            
+            setIsLoading(false);
+            
+            // Set up auto-refresh with real data
+            const interval = setInterval(async () => {
+                const newMarketData = await getMockMarketData(); // Now async!
+                const newRecs = system.generateRecommendations(newMarketData);
+                setRecommendations(newRecs);
+                setPerformance(system.getPerformanceMetrics());
+            }, 30000); // Update every 30 seconds
+            
+            return () => clearInterval(interval);
+        } catch (error) {
+            console.error('Failed to initialize ML system:', error);
+            setIsLoading(false);
+        }
+    };
+    
+    initializeML();
+}, []);
   const getMockMarketData = async () => {
     try {
         // Try to fetch real data first
