@@ -4,6 +4,11 @@ const FMP_KEY = process.env.REACT_APP_FMP_API_KEY;
 const UW_KEY = process.env.REACT_APP_UNUSUAL_WHALES_KEY;
 const ALPHA_VANTAGE_KEY = process.env.REACT_APP_ALPHA_VANTAGE_KEY || 'demo';
 const TWELVE_DATA_KEY = process.env.REACT_APP_TWELVE_DATA_KEY;
+console.log('Keys check:', { 
+    twelve: TWELVE_DATA_KEY ? 'loaded' : 'missing',
+    alpha: ALPHA_VANTAGE_KEY ? 'loaded' : 'missing',
+    polygon: POLYGON_KEY ? 'loaded' : 'missing'
+});
 
 // Debug: Check if API keys are loaded (only first few chars for security)
 console.log('API Keys loaded:', {
@@ -150,32 +155,53 @@ export async function getOptionsFlow() {
     }
 
     try {
-        // Using the options flow endpoint
-        const url = `https://api.unusualwhales.com/api/stock/options/flow?ticker=SPY&limit=20`;
+        // Try the correct endpoint format
+        const url = `https://api.unusualwhales.com/api/stock/SPY/options-flow`;
         const headers = {
             'Accept': 'application/json',
-            'Authorization': `Bearer ${UW_KEY}`
+            'x-api-key': UW_KEY  // Try x-api-key header format
         };
         
         const response = await fetch(url, { headers });
-        const data = await response.json();
         
-        if (data && data.data) {
-            return data.data.slice(0, 10).map(flow => ({
-                symbol: flow.underlying_symbol || flow.ticker || 'SPY',
-                type: flow.option_type ? flow.option_type.toUpperCase() : 'CALL',
-                strike: flow.strike || 0,
-                expiry: flow.expiry || flow.expires_at || '2025-01-17',
-                premium: flow.premium || flow.total_premium || 0,
-                volume: flow.volume || flow.size || 0,
-                sentiment: flow.tags && flow.tags.includes('bullish') ? 'BULLISH' : 
-                          flow.tags && flow.tags.includes('bearish') ? 'BEARISH' : 'NEUTRAL',
-                price: flow.price || 0,
-                underlying: flow.underlying_price || 0
-            }));
+        if (!response.ok) {
+            console.log('UW API response not OK, trying alternative format...');
+            // Try alternative endpoint
+            const altUrl = `https://api.unusualwhales.com/v1/market/options/flow?limit=10`;
+            const altResponse = await fetch(altUrl, { 
+                headers: { 'Authorization': `Bearer ${UW_KEY}` }
+            });
+            
+            if (altResponse.ok) {
+                const data = await altResponse.json();
+                if (data && data.data) {
+                    return data.data.slice(0, 10).map(flow => ({
+                        symbol: flow.underlying_symbol || flow.ticker || 'SPY',
+                        type: flow.option_type ? flow.option_type.toUpperCase() : 'CALL',
+                        strike: flow.strike || 0,
+                        expiry: flow.expiry || '2025-01-17',
+                        premium: flow.premium || 0,
+                        volume: flow.volume || 0,
+                        sentiment: 'NEUTRAL'
+                    }));
+                }
+            }
+        } else {
+            const data = await response.json();
+            if (data && data.data) {
+                return data.data.slice(0, 10).map(flow => ({
+                    symbol: flow.underlying_symbol || flow.ticker || 'SPY',
+                    type: flow.option_type ? flow.option_type.toUpperCase() : 'CALL',
+                    strike: flow.strike || 0,
+                    expiry: flow.expiry || '2025-01-17',
+                    premium: flow.premium || 0,
+                    volume: flow.volume || 0,
+                    sentiment: 'NEUTRAL'
+                }));
+            }
         }
     } catch (error) {
-        console.error('Error fetching UW options flow:', error);
+        console.log('UW API error, using mock data:', error.message);
     }
     
     return getMockOptionsFlow();
